@@ -98,6 +98,54 @@ const unselectPreviousCells = function () {
 printCurrentMonthInH1()
 // numberOfDaysInCurrentMonth() // questa funzione se eseguita torna il NUMERO dei giorni del mese corrente
 
+const showAppointmentsSection = function () {
+  const appointmentsSection = document.getElementById('appointments')
+  appointmentsSection.style.display = 'block'
+}
+
+const hideAppointmentsSection = function () {
+  const appointmentsSection = document.getElementById('appointments')
+  appointmentsSection.style.display = 'none'
+}
+
+// ho slegato la funzione createAppointmentsList in modo da renderla riutilizzabile:
+// il problema è che la funzione ora non sa quale sia il cassettino da aprire,
+// perchè sa solo aprire uno, crearne la lista e mostrarla
+const createAppointmentsList = function (i) {
+  // un altro pezzo ora: se la giornata selezionata ha degli eventi salvati
+  // nel proprio cassettino della cassettiera (appointments), dobbiamo riempire
+  // la lista (vuota) c'è presente in HTML e togliergli il display: none
+  if (appointments[i].length > 0) {
+    // vuol dire che la giornata cliccata ha degli eventi da mostrare!
+    // li preleviamo dal nostro cassettino
+    const appointmentsForThisDay = appointments[i]
+    // prendo il riferimento HTML alla lista ul che al momento è nascosta
+    const listToFill = document.getElementById('appointmentsList')
+
+    // prima di ri-appendere eventi a questa lista, la svuoto
+    // in modo da ripulire eventi precedenti
+    listToFill.innerHTML = ''
+
+    // questo .sort() si occupa, prima di creare la lista, di ordinare
+    // gli eventi in ordine alfabetico per orario
+    appointmentsForThisDay.sort()
+
+    appointmentsForThisDay.forEach((appointment) => {
+      // creo un nuovo <li> per la lista
+      const newLi = document.createElement('li')
+      // ci metto il testo dentro
+      newLi.innerText = appointment
+      // lo appendo alla lista
+      listToFill.appendChild(newLi)
+    })
+
+    // togliamo il display: none dalla sezione degli appuntamenti del giorno
+    showAppointmentsSection()
+  } else {
+    hideAppointmentsSection()
+  }
+}
+
 // abbiamo capito quanti giorni ha il mese corrente: questo numero ci servirà
 // per capire QUANTE CELLE CREARE nel nostro calendario!
 // vado a creare una funzione che riempirà la section con id "calendar" con un numero
@@ -134,6 +182,10 @@ const createCells = function () {
       const spanToRename = document.getElementById('newMeetingDay')
       spanToRename.innerText = i + 1
       spanToRename.classList.add('hasDay') // lo faccio più grande, con uno sfondo etc.
+
+      // invoco la funzione che, fornito un numero di un cassettino, lo apre, crea
+      // la lista e mostra la sezione nascosta
+      createAppointmentsList(i)
     })
 
     const dayCellValue = document.createElement('h3') // <h3></h3>
@@ -158,9 +210,40 @@ form.addEventListener('submit', function (e) {
   // DISABILITO IL REFRESH
   e.preventDefault()
   // ora possiamo integrare la nostra logica
-  //   cosa faremo:
-  // creare la stringa dell'evento -> "16:00 - Dentista"
-  //   pushare questa stringa nel "cassettino" appropriato degli appointments
+  // cosa faremo:
+  // 1) creare la stringa dell'evento -> "16:00 - Dentista"
+  const meetingTimeInput = document.getElementById('newMeetingTime')
+  const meetingNameInput = document.getElementById('newMeetingName')
+  const appointment = meetingTimeInput.value + ' - ' + meetingNameInput.value
+  // const appointment = `${meetingTimeInput.value} - ${meetingNameInput.value}`
+  console.log(appointment)
+
+  // 2) pushare questa stringa nel "cassettino" appropriato degli appointments
+  // recuperare dallo span in basso a sx il giorno che prima avevamo "parcheggiato"
+  const spanWithDay = document.getElementById('newMeetingDay')
+  const selectedDay = spanWithDay.innerText // leggo il contenuto testuale
+  console.log('giorno del mese su cui salvare', selectedDay)
+  appointments[parseInt(selectedDay) - 1].push(appointment) // ho convertito il giorno in stringa in numero
   // svuotare il form
+  form.reset()
   // aggiungere alla cella selezionata una ulteriore classe "dot"
+  //   troviamo la cella corrispondente al giorno in cui abbiamo salvato l'ultimo evento
+  const selectedCell = document.querySelector('.selected')
+  // l'idea è ora di aggiungere DENTRO questa selectedCell uno span con classe "dot"
+  // però lo voglio aggiungere SOLO se dentro questa selectedCell non c'è già!
+  // quindi CERCO se il dot c'è già! solo nel caso non ci sia, lo aggiungo
+  const dotAlreadyPresent = selectedCell.querySelector('.dot')
+  // quando il dot ancora non c'è...
+  if (!dotAlreadyPresent) {
+    // ...allora lo metto :)
+    const dot = document.createElement('span')
+    dot.classList.add('dot')
+    selectedCell.appendChild(dot)
+  }
+
+  console.log('APPOINTMENTS', appointments)
+  // ciliegina finale: mostro automaticamente la sezione degli appuntamenti
+  // per questa giornata!
+
+  createAppointmentsList(parseInt(selectedDay) - 1)
 })
