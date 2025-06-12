@@ -74,6 +74,8 @@ form {
 }
 
 .day.selected {
+  /* questo è un selettore che va a cercare gli elementi HTML dotati di
+  classe "day" e "selected" contemporaneamente */
   border-color: #7a408a;
 }
 
@@ -127,7 +129,8 @@ input:focus::placeholder {
   background-color: #0c0b1d;
   border-radius: 3px;
   color: #ebebeb;
-  padding: 0px 6px;
+  padding: 20px;
+  margin-right: 1em;
 }
 
 #newMeetingTime::-webkit-calendar-picker-indicator {

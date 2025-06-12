@@ -74,6 +74,27 @@ const numberOfDaysInCurrentMonth = function () {
   return lastDayOfTheMonth.getDate() // 30
 }
 
+const unselectPreviousCells = function () {
+  // prima di applicare la classe "selected" ad una nuova cella, devo assicurarmi
+  // di togliere la classe "selected" dalle altre in cui è già presente
+
+  //   2 MODI:
+  // APPROCCIO BULLDOZER
+  // ciclo TUTTE LE CELLE, tolgo la classe selected a tutte le celle
+  //   const allTheCells = document.getElementsByClassName('day')
+  //   for (let i = 0; i < allTheCells.length; i++) {
+  //     allTheCells[i].classList.remove('selected')
+  //   }
+
+  // APPROCCIO DOTT.PIVETTA
+  //   ce n'è al massimo UNA già con la classe "selected"!
+  // la trovo e vi tolgo la classe
+  const previouslySelected = document.querySelector('.selected')
+  if (previouslySelected) {
+    previouslySelected.classList.remove('selected')
+  }
+}
+
 printCurrentMonthInH1()
 // numberOfDaysInCurrentMonth() // questa funzione se eseguita torna il NUMERO dei giorni del mese corrente
 
@@ -97,6 +118,24 @@ const createCells = function () {
     // per ogni giorno del mese, creo una cella
     const dayCell = document.createElement('div') // <div></div>
     dayCell.classList.add('day') // <div class="day"></div>
+
+    // dopo aver creato la cella, la rendo cliccabile!
+    dayCell.addEventListener('click', function () {
+      console.log('hai cliccato una cella')
+      //   quando clicco una cella, la voglio evidenziare con un bordo viola
+      //   per farlo, vi aggiungo la classe css (già disponibile) di nome "selected"
+
+      // richiamo ora la funzione che TOGLIE i precedenti "selected"
+      unselectPreviousCells()
+
+      dayCell.classList.add('selected')
+
+      //   ora inserisco il numero del giorno selezionato nello span "newMeetingDay"
+      const spanToRename = document.getElementById('newMeetingDay')
+      spanToRename.innerText = i + 1
+      spanToRename.classList.add('hasDay') // lo faccio più grande, con uno sfondo etc.
+    })
+
     const dayCellValue = document.createElement('h3') // <h3></h3>
     dayCellValue.innerText = i + 1 // per fare le celle dall'1 al 30, es. <h3>1</h3>
     dayCell.appendChild(dayCellValue) // <div class="day"><h3>1</h3></div>
@@ -109,3 +148,19 @@ const createCells = function () {
 }
 
 createCells()
+
+// ora che le celle sono state create, dobbiamo spostarci nella sezione sottostante
+// operiamo sul form: dobbiamo salvare gli appuntamenti nei cassetti della "cassettiera"
+// primo passo -> disabilitare il comportamento di default dell'evento submit del form
+
+const form = document.getElementById('meeting-form')
+form.addEventListener('submit', function (e) {
+  // DISABILITO IL REFRESH
+  e.preventDefault()
+  // ora possiamo integrare la nostra logica
+  //   cosa faremo:
+  // creare la stringa dell'evento -> "16:00 - Dentista"
+  //   pushare questa stringa nel "cassettino" appropriato degli appointments
+  // svuotare il form
+  // aggiungere alla cella selezionata una ulteriore classe "dot"
+})
